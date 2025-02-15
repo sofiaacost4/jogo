@@ -1,6 +1,14 @@
 import pygame
 import random
 
+def quant_maçãs(lista, numero,):
+  if numero == 2: 
+    all_sprites = pygame.sprite.Group([maçã_1, maçã_2, maçã_3, menina])
+  elif numero == 15:
+    all_sprites = pygame.sprite.Group([maçã_1, maçã_2, maçã_3, maçã_4, maçã_5, maçã_6, menina])
+  elif numero == 30: 
+    all_sprites = pygame.sprite.Group([lista, menina])
+
 class MeninaSprite(pygame.sprite.Sprite):
   def __init__(self):
     pygame.sprite.Sprite.__init__(self)
@@ -33,11 +41,11 @@ class MaçãPodre(pygame.sprite.Sprite):
       self.image = maçãpodre_img
       self.rect = self.image.get_rect()
       self.rect.topleft = (100, 70)
-      self.velocidade = 8
+      self.velocidade = 4
+      self.posicao = 0
 
 class Maçã(pygame.sprite.Sprite):
   def __init__(self):
-    for l in range(5):
       pygame.sprite.Sprite.__init__(self)
       maçã_img = pygame.image.load('maca.png')
       maçã_img = pygame.transform.scale(maçã_img, (90,90))
@@ -46,18 +54,21 @@ class Maçã(pygame.sprite.Sprite):
       self.rect.topleft = (190, 70)
       self.velocidade = 3
       self.posicao = 0
+      self.rect.topleft = (self.rect.x, self.rect.y)
 
-  def maçã_cai(self):
-    while self.posicao == 0: 
-      self.posicao += self.velocidade
-    self.rect.y += self.posicao
-    if self.rect.y > 650:
-      self.rect.y = 70
-
-  def local(self):
+  def local_x(self):
     self.rect.y = 70
     x = [50, 100, 150, 200, 250, 300, 350, 400, 450]
     self.rect.x = random.choice(x)
+
+  def maçã_cai_y(self):
+    while self.posicao == 0: 
+      self.posicao += self.velocidade
+    self.rect.y += self.posicao
+    if self.rect.y == 658:
+      self.rect.y = 70
+      self.rect.x = sprites_maçãs.local_x()
+    return self.rect.y
 
 
 num = 0
@@ -71,11 +82,20 @@ running = True
 
 font = pygame.font.Font(None, 24)
 
+#criação dos sprites
 menina = MeninaSprite()
 maçãpodre = MaçãPodre()
-maçã = Maçã()
-maçã.local()
-all_sprites = pygame.sprite.Group([menina, maçãpodre, maçã])
+maçã_1 = Maçã()
+maçã_2 = Maçã()
+maçã_3 = Maçã()
+maçã_4 = Maçã()
+maçã_5 = Maçã()
+maçã_6 = Maçã()
+maçã_7 = Maçã()
+maçã_8 = Maçã()
+lista_maçãs = [maçã_2, maçã_3, maçã_4, maçã_5, maçã_6, maçã_7, maçã_8]
+all_sprites = pygame.sprite.Group([menina, maçã_1])
+sprites_maçãs = pygame.sprite.Group([maçã_1, lista_maçãs])
 
 fundo_img = pygame.image.load('fundo.png')
 
@@ -84,23 +104,23 @@ while running:
     if event.type == pygame.QUIT:
       running = False
 
-  maçã.maçã_cai()
   keys = pygame.key.get_pressed()
   if keys[pygame.K_LEFT]:
     menina.p_esquerda()
   if keys[pygame.K_RIGHT]:
     menina.p_direita()
 
-  if menina.rect.colliderect(maçã.rect):
-    num += 1
-    maçã.local()
+  hit_list = pygame.sprite.spritecollide(menina, sprites_maçãs, True)
+  all_sprites.remove(hit_list)
+  sprites_maçãs.remove(hit_list)
+  quant_maçãs(num, lista_maçãs)
 
   screen.fill((255, 255, 255))
 
   screen.blit(fundo_img,(0,0))
   all_sprites.draw(screen)
-  texto = font.render(f"Maçãs:{num}", True, 'white')
-  screen.blit(texto, (400, 600))
+  texto = font.render(f"Maçãs: {num}", True, 'white')
+  screen.blit(texto, (20, 12))
   pygame.display.flip()
   clock.tick(60)
 
