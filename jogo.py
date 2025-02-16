@@ -50,10 +50,7 @@ class MaçãPodre(pygame.sprite.Sprite):
         self.rect.topleft = (random.choice([50, 150, 250, 350, 450, 550]), 70)
         self.velocidade = 3
     def update(self):
-        self.rect.y += self.velocidade
-        if self.rect.y >= 658:
-            self.rect.y = 70
-        
+        self.rect.y += self.velocidade  
 
 #gera as maçãs
 def criar_maçãs(numero):
@@ -83,6 +80,7 @@ num = 0
 vidas = 3
 x = 1
 y = 2
+prox_maçã_podre = 10
 
 #game loop
 while running:
@@ -102,15 +100,22 @@ while running:
   
     all_sprites.update()
     
-    #adiciona a maçã podre no jogo quando o jogador coletar 10 maçãs
-    if num >= 10 and len(sprites_maçãs_podres) == 0:
-     maçãpodre = MaçãPodre()
-     sprites_maçãs_podres.add(maçãpodre)
-     all_sprites.add(maçãpodre)
+    #adiciona uma maçã podre no jogo a cada 10 maçãs coletadas
+
+    if num == prox_maçã_podre:
+      prox_maçã_podre += 10  # Atualiza o próximo ponto de criação
+      maçãpodre = MaçãPodre()
+      sprites_maçãs_podres.add(maçãpodre)
+      all_sprites.add(maçãpodre)
     
+       
+    if hit_list:
+        num += len(hit_list)
+
     #verifica se o jogador colidiu com uma maçã podre
     if hit_list_2:
         vidas -= 1
+        sprites_maçãs_podres.remove(*hit_list_2)
         if vidas <= 0:
             running = False
 
@@ -126,9 +131,6 @@ while running:
             y = 4
         sprites_maçãs.add(maçãs)
         all_sprites.add(maçãs)
-   
-    if hit_list:
-        num += len(hit_list)
 
     # Atualiza a tela
     screen.fill((255, 255, 255))
