@@ -81,8 +81,7 @@ fundo_img = pygame.image.load('fundo.png')
 #variaveis
 num = 0
 vidas = 3
-x = 1
-y = 2
+x, y = 1, 2
 prox_maçã_podre = 10
 
 
@@ -106,10 +105,16 @@ while running:
   
     all_sprites.update()
     
-    #adiciona uma maçã podre no jogo a cada 10 maçãs coletadas
-
-    if num == prox_maçã_podre:
-      prox_maçã_podre += 10
+    #adiciona uma maçã podre no jogo a cada 10, 5, 2 ou 1 maçãs coletadas, dependendo da quantidade de maçãs que o jogador tiver coletado
+    if num >= prox_maçã_podre:
+      if num < 50:
+       prox_maçã_podre += 10
+      elif num <= 100:
+       prox_maçã_podre += 5
+      elif num <= 150:
+       prox_maçã_podre += 2
+      elif num > 150:
+       prox_maçã_podre += 1
       maçãpodre = MaçãPodre()
       sprites_maçãs_podres.add(maçãpodre)
       all_sprites.add(maçãpodre)
@@ -127,11 +132,10 @@ while running:
     #adiciona novas maçãs quando o jogador coleta uma determinada quantidade de maçãs
     if len(sprites_maçãs) < y:
         maçãs = criar_maçãs(x)
-        if num >= 25:
-            x = 2
-            y = 3
-        if num >= 80:
+        if num >= 50 and num <= 100:
             y = 4
+        elif num >= 100:
+            y = 5
         sprites_maçãs.add(maçãs)
         all_sprites.add(maçãs)
 
