@@ -19,12 +19,16 @@ class MeninaSprite(pygame.sprite.Sprite):
             self.direcao = 1
             self.image = pygame.transform.flip(self.image, True, False)
         self.rect.x -= self.velocidade
+        if self.rect.x < -56: #não permite que o jogador ande com a menina para além do cenário visível
+            self.rect.x = -56
 
     def p_direita(self):
         if self.direcao == 1:
             self.direcao = 0
             self.image = pygame.transform.flip(self.image, True, False)
         self.rect.x += self.velocidade
+        if self.rect.x > 497:
+            self.rect.x = 497
 
 class MaçãSprite(pygame.sprite.Sprite):
     def __init__(self):
@@ -105,7 +109,7 @@ while running:
   
     all_sprites.update()
     
-    #adiciona uma maçã podre no jogo a cada 10, 5, 2 ou 1 maçãs coletadas, dependendo da quantidade de maçãs que o jogador tiver coletado
+    #adiciona uma maçã podre no jogo a cada 10, 5, 2 ou 1 maçãs coletadas, dependendo da quantidade de maçãs que o jogador tiver coletado ao decorrer do jogo.
     if num >= prox_maçã_podre:
       if num < 50:
        prox_maçã_podre += 10
