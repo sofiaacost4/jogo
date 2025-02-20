@@ -1,6 +1,17 @@
 import pygame
 import random
 
+def menu_inicial(screen, fundo, texto, x, y):
+    screen.blit(fundo, (0,0))
+    screen.blit(texto, (x, y))
+    pygame.display.flip()
+    esperando = True
+    while esperando:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                esperando = False
 
 class MeninaSprite(pygame.sprite.Sprite):
     def __init__(self):
@@ -10,16 +21,16 @@ class MeninaSprite(pygame.sprite.Sprite):
         self.image = menina_img
         self.rect = menina_img.get_rect()
         self.rect.topleft = (210, 270)
-        self.mask = pygame.mask.from_surface(self.image) #cria uma máscara para aperfeiçoar a colisão
+        self.mask = pygame.mask.from_surface(self.image)
         self.velocidade = 4
-        self.direcao = 0  # 0 - direita | 1 - esquerda
+        self.direcao = 0
 
     def p_esquerda(self):
         if self.direcao == 0:
             self.direcao = 1
             self.image = pygame.transform.flip(self.image, True, False)
         self.rect.x -= self.velocidade
-        if self.rect.x < -56: #não permite que o jogador ande com a menina para além do cenário visível
+        if self.rect.x < -56:
             self.rect.x = -56
 
     def p_direita(self):
@@ -30,129 +41,108 @@ class MeninaSprite(pygame.sprite.Sprite):
         if self.rect.x > 497:
             self.rect.x = 497
 
-class MaçãSprite(pygame.sprite.Sprite):
+class MacaSprite(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        maçã_img = pygame.image.load('maca.png')
-        maçã_img = pygame.transform.scale(maçã_img, (90, 90))
-        self.image = maçã_img
+        maca_img = pygame.image.load('maca.png')
+        maca_img = pygame.transform.scale(maca_img, (90, 90))
+        self.image = maca_img
         self.rect = self.image.get_rect()
         self.rect.topleft = (random.choice([50, 150, 250, 350, 450, 550]), 70)
         self.mask = pygame.mask.from_surface(self.image)
         self.velocidade = 2
-        self.posicao = 0
 
     def update(self):
         self.rect.y += self.velocidade
         if self.rect.y >= 658:
             self.rect.y = 70
 
-class MaçãPodre(pygame.sprite.Sprite):
+class MacaPodre(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        maçãpodre_img = pygame.image.load('macapodre.png')
-        maçãpodre_img = pygame.transform.scale(maçãpodre_img, (90, 90))
-        self.image = maçãpodre_img
+        macapodre_img = pygame.image.load('macapodre.png')
+        macapodre_img = pygame.transform.scale(macapodre_img, (90, 90))
+        self.image = macapodre_img
         self.rect = self.image.get_rect()
         self.rect.topleft = (random.choice([50, 150, 250, 350, 450, 550]), 70)
         self.velocidade = 3
+
     def update(self):
-        self.rect.y += self.velocidade  
+        self.rect.y += self.velocidade
 
-#gera as maçãs
-def criar_maçãs(numero):
-    maçãs = []
+def criar_macas(numero):
+    macas = []
     for i in range(numero):
-        maçãs.append(MaçãSprite())
-    return maçãs
+        macas.append(MacaSprite())
+    return macas
 
-pygame.init()
-screen = pygame.display.set_mode((640, 480))
-clock = pygame.time.Clock()
-running = True
+def game_loop():
+    pygame.init()
+    screen = pygame.display.set_mode((640, 480))
+    clock = pygame.time.Clock()
+    font = pygame.font.Font(None, 24)
+    pygame.display.set_caption("Colheita")
+    fundo_img = pygame.image.load('fundo.png')
+    texto = font.render("Pressione ENTER para jogar!", True, 'white')
+    x, y = 210, 12
 
-#fonte
-font = pygame.font.Font(None, 24)
+    while True:
+        menu_inicial(screen, fundo_img, texto, x, y)
+        menina = MeninaSprite()
+        macas = criar_macas(1)
+        all_sprites = pygame.sprite.Group([menina] + macas)
+        sprites_macas = pygame.sprite.Group(macas)
+        sprites_macas_podres = pygame.sprite.Group()
+        num = 0
+        vidas = 3
+        prox_maca_podre = 10
+        running = True
 
-#cria os sprites e grupos de sprites
-menina = MeninaSprite()
-maçãs = criar_maçãs(1)
-all_sprites = pygame.sprite.Group([menina] + maçãs)
-sprites_maçãs = pygame.sprite.Group(maçãs)
-sprites_maçãs_podres = pygame.sprite.Group()
-fundo_img = pygame.image.load('fundo.png')
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT]:
+                menina.p_esquerda()
+            if keys[pygame.K_RIGHT]:
+                menina.p_direita()
+            pygame.mouse.set_visible(False)
+            hit_list = pygame.sprite.spritecollide(menina, sprites_macas, True, pygame.sprite.collide_mask)
+            hit_list_2 = pygame.sprite.spritecollide(menina, sprites_macas_podres, True, pygame.sprite.collide_mask)
+            all_sprites.update()
 
-#variaveis
-num = 0
-vidas = 3
-x, y = 1, 2
-prox_maçã_podre = 10
+            if num >= prox_maca_podre:
+                prox_maca_podre += 10 if num < 50 else 5 if num <= 100 else 2 if num <= 150 else 1
+                macapodre = MacaPodre()
+                sprites_macas_podres.add(macapodre)
+                all_sprites.add(macapodre)
+            
+            if hit_list:
+                num += len(hit_list)
+            if hit_list_2:
+                vidas -= 1
+                for maca in hit_list_2:
+                    sprites_macas_podres.remove(maca)
+                if vidas <= 0:
+                    texto = font.render("Ah não, você perdeu! Pressione ENTER para tentar novamente.", True, 'white')
+                    x, y = 80, 12
+                    running = False
 
+            if len(sprites_macas) < 2:
+                macas = criar_macas(1)
+                sprites_macas.add(macas)
+                all_sprites.add(macas)
 
-#game loop
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+            screen.fill((255, 255, 255))
+            screen.blit(fundo_img, (0, 0))
+            all_sprites.draw(screen)
+            texto_1 = font.render(f"Maçãs: {num}", True, 'white')
+            screen.blit(texto_1, (20, 12))
+            texto_2 = font.render(f"Vidas: {vidas}", True, 'white')
+            screen.blit(texto_2, (560, 12))
+            pygame.display.flip()
+            clock.tick(60)
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        menina.p_esquerda()
-    if keys[pygame.K_RIGHT]:
-        menina.p_direita()
-    
-    pygame.mouse.set_visible(False)
-
-    #verifica a colisão com as máscaras
-    hit_list = pygame.sprite.spritecollide(menina, sprites_maçãs, True, pygame.sprite.collide_mask)
-    hit_list_2 = pygame.sprite.spritecollide(menina, sprites_maçãs_podres, True, pygame.sprite.collide_mask)
-  
-    all_sprites.update()
-    
-    #adiciona uma maçã podre no jogo a cada 10, 5, 2 ou 1 maçãs coletadas, dependendo da quantidade de maçãs que o jogador tiver coletado ao decorrer do jogo.
-    if num >= prox_maçã_podre:
-      if num < 50:
-       prox_maçã_podre += 10
-      elif num <= 100:
-       prox_maçã_podre += 5
-      elif num <= 150:
-       prox_maçã_podre += 2
-      elif num > 150:
-       prox_maçã_podre += 1
-      maçãpodre = MaçãPodre()
-      sprites_maçãs_podres.add(maçãpodre)
-      all_sprites.add(maçãpodre)
-       
-    if hit_list:
-        num += len(hit_list)
-
-    #verifica se o jogador colidiu com uma maçã podre
-    if hit_list_2:
-        vidas -= 1
-        sprites_maçãs_podres.remove(*hit_list_2)
-        if vidas <= 0:
-            running = False
-
-    #adiciona novas maçãs quando o jogador coleta uma determinada quantidade de maçãs
-    if len(sprites_maçãs) < y:
-        maçãs = criar_maçãs(x)
-        if num >= 50 and num <= 100:
-            y = 4
-        elif num >= 100:
-            y = 5
-        sprites_maçãs.add(maçãs)
-        all_sprites.add(maçãs)
-
-    screen.fill((255, 255, 255))
-    screen.blit(fundo_img, (0, 0))
-    all_sprites.draw(screen)
-
-    texto = font.render(f"Maçãs: {num}", True, 'white')
-    screen.blit(texto, (20, 12))
-    texto = font.render(f"Vidas: {vidas}", True, 'white')
-    screen.blit(texto, (560, 12))
-
-    pygame.display.flip()
-    clock.tick(60)
-
-pygame.quit()
+game_loop()
