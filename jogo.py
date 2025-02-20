@@ -1,3 +1,4 @@
+#Grupo: Sofia Costa
 import pygame
 import random
 
@@ -21,7 +22,7 @@ class MeninaSprite(pygame.sprite.Sprite):
         self.image = menina_img
         self.rect = menina_img.get_rect()
         self.rect.topleft = (210, 270)
-        self.mask = pygame.mask.from_surface(self.image)
+        self.mask = pygame.mask.from_surface(self.image) #cria uma máscara para aperfeiçoar a colisão
         self.velocidade = 4
         self.direcao = 0
 
@@ -70,6 +71,7 @@ class MacaPodre(pygame.sprite.Sprite):
     def update(self):
         self.rect.y += self.velocidade
 
+#função para criar os sprites das maçãs
 def criar_macas(numero):
     macas = []
     for i in range(numero):
@@ -85,6 +87,7 @@ def game_loop():
     fundo_img = pygame.image.load('fundo.png')
     texto = font.render("Pressione ENTER para jogar!", True, 'white')
     x, y = 210, 12
+    m = 2
 
     while True:
         menu_inicial(screen, fundo_img, texto, x, y)
@@ -113,12 +116,21 @@ def game_loop():
             hit_list_2 = pygame.sprite.spritecollide(menina, sprites_macas_podres, True, pygame.sprite.collide_mask)
             all_sprites.update()
 
+            #aumenta o numero de maçãs podres conforme o jogador coleta maçãs ao decorrer do jogo
             if num >= prox_maca_podre:
-                prox_maca_podre += 10 if num < 50 else 5 if num <= 100 else 2 if num <= 150 else 1
+                if num < 50:
+                    prox_maca_podre += 5
+                elif num < 100:
+                    prox_maca_podre += 3
+                elif num < 150: 
+                    prox_maca_podre += 2
+                else:
+                    prox_maca_podre += 1
                 macapodre = MacaPodre()
                 sprites_macas_podres.add(macapodre)
                 all_sprites.add(macapodre)
             
+            #verifica a colisão com as maçãs normais e as maçãs podres
             if hit_list:
                 num += len(hit_list)
             if hit_list_2:
@@ -130,8 +142,15 @@ def game_loop():
                     x, y = 80, 12
                     running = False
 
-            if len(sprites_macas) < 2:
+            #cria os sprites das maçãs e aumenta a quantidade de sprites criados gradualmente
+            if len(sprites_macas) < m:
                 macas = criar_macas(1)
+                if num < 100 and num >= 50:
+                    m = 3
+                elif num > 100 and num <= 150:
+                    m = 4
+                elif num > 150:
+                    m = 5
                 sprites_macas.add(macas)
                 all_sprites.add(macas)
 
