@@ -82,11 +82,11 @@ def game_loop():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
     clock = pygame.time.Clock()
-    font = pygame.font.Font(None, 24)
+    font = pygame.font.Font('MysteryQuest-Regular.ttf', 24)
     pygame.display.set_caption("Colheita")
     fundo_img = pygame.image.load('fundo.png')
     texto = font.render("Pressione ENTER para jogar!", True, 'white')
-    x, y = 210, 12
+    x, y = 190, 5
     m = 2
 
     while True:
@@ -138,14 +138,16 @@ def game_loop():
                 for maca in hit_list_2:
                     sprites_macas_podres.remove(maca)
                 if vidas <= 0:
-                    texto = font.render("Ah não, você perdeu! Pressione ENTER para tentar novamente.", True, 'white')
-                    x, y = 80, 12
+                    texto = font.render("Ah não, você perdeu! Pressione ENTER para tentar de novo.", True, 'white')
+                    x, y = 20, 5
                     running = False
 
             #cria os sprites das maçãs e aumenta a quantidade de sprites criados gradualmente
             if len(sprites_macas) < m:
                 macas = criar_macas(1)
-                if num < 100 and num >= 50:
+                if num < 50:
+                    m = 2
+                elif num < 100 and num >= 50:
                     m = 3
                 elif num > 100 and num <= 150:
                     m = 4
@@ -158,9 +160,9 @@ def game_loop():
             screen.blit(fundo_img, (0, 0))
             all_sprites.draw(screen)
             texto_1 = font.render(f"Maçãs: {num}", True, 'white')
-            screen.blit(texto_1, (20, 12))
+            screen.blit(texto_1, (20, 5))
             texto_2 = font.render(f"Vidas: {vidas}", True, 'white')
-            screen.blit(texto_2, (560, 12))
+            screen.blit(texto_2, (535, 5))
             pygame.display.flip()
             clock.tick(60)
 
