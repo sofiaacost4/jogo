@@ -17,30 +17,55 @@ def menu_inicial(screen, fundo, texto, x, y):
 class MeninaSprite(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        menina_img = pygame.image.load('menina.png').convert_alpha()
-        menina_img = pygame.transform.scale(menina_img, (200, 200))
-        self.image = menina_img
-        self.rect = menina_img.get_rect()
+        
+        self.image_1 = pygame.transform.scale(pygame.image.load('menina.png').convert_alpha(), (200, 200))
+
+        self.images = [
+            pygame.transform.scale(pygame.image.load('menina1.png').convert_alpha(), (200, 200)),
+            pygame.transform.scale(pygame.image.load('menina2.png').convert_alpha(), (200, 200)),
+            pygame.transform.scale(pygame.image.load('menina3.png').convert_alpha(), (200, 200)),
+            pygame.transform.scale(pygame.image.load('menina4.png').convert_alpha(), (200, 200))
+        ]
+        
+        self.image = self.images[0]  #frame inicial da animação
+        self.rect = self.image.get_rect()
         self.rect.topleft = (210, 270)
-        self.mask = pygame.mask.from_surface(self.image) #cria uma máscara para aperfeiçoar a colisão
+        self.mask = pygame.mask.from_surface(self.image)
         self.velocidade = 4
-        self.direcao = 0
+        self.direcao = 0 # 0 direita | 1 esquerda
+        self.tick = 1
+        self.frame = 0  #indice do frame inicial
+        self.andando = False
+
+    def update(self):
+        if self.andando:
+            self.tick += 1
+            if self.tick % 15 == 0:
+                self.frame = (self.frame + 1) % len(self.images)
+                self.image = self.images[self.frame]
+        else:
+            self.image = self.image_1
 
     def p_esquerda(self):
-        if self.direcao == 0:
-            self.direcao = 1
-            self.image = pygame.transform.flip(self.image, True, False)
+        if self.direcao == 0:  # Se estava virado para a direita
+            self.direcao = 1  # Agora está para a esquerda
+            self.images = [pygame.transform.flip(img, True, False) for img in self.images]
+            self.image_1 = pygame.transform.flip(self.image_1, True, False)  # Inverte a imagem parada
+
         self.rect.x -= self.velocidade
-        if self.rect.x < -56:
-            self.rect.x = -56
+        self.rect.x = max(self.rect.x, -56)  # Impede que ultrapasse o limite esquerdo
+        self.andando = True
 
     def p_direita(self):
-        if self.direcao == 1:
-            self.direcao = 0
-            self.image = pygame.transform.flip(self.image, True, False)
+        if self.direcao == 1:  # Se estava virado para a esquerda
+            self.direcao = 0  # Agora está para a direita
+            self.images = [pygame.transform.flip(img, True, False) for img in self.images]
+            self.image_1 = pygame.transform.flip(self.image_1, True, False)  # Inverte a imagem parada
+
         self.rect.x += self.velocidade
-        if self.rect.x > 497:
-            self.rect.x = 497
+        self.rect.x = min(self.rect.x, 497)  # Impede que ultrapasse o limite direito
+        self.andando = True
+
 
 class MacaSprite(pygame.sprite.Sprite):
     def __init__(self):
@@ -94,6 +119,7 @@ def game_loop():
         menina = MeninaSprite()
         macas = criar_macas(1)
         all_sprites = pygame.sprite.Group([menina] + macas)
+        sprites_menina = pygame.sprite.Group([menina])
         sprites_macas = pygame.sprite.Group(macas)
         sprites_macas_podres = pygame.sprite.Group()
         num = 0
@@ -106,7 +132,11 @@ def game_loop():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
+            
+            sprites_menina.update()
+
             keys = pygame.key.get_pressed()
+            menina.andando = False
             if keys[pygame.K_LEFT]:
                 menina.p_esquerda()
             if keys[pygame.K_RIGHT]:
