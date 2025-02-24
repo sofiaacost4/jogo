@@ -47,23 +47,23 @@ class MeninaSprite(pygame.sprite.Sprite):
             self.image = self.image_1
 
     def p_esquerda(self):
-        if self.direcao == 0:  # Se estava virado para a direita
-            self.direcao = 1  # Agora está para a esquerda
+        if self.direcao == 0:
+            self.direcao = 1
             self.images = [pygame.transform.flip(img, True, False) for img in self.images]
-            self.image_1 = pygame.transform.flip(self.image_1, True, False)  # Inverte a imagem parada
+            self.image_1 = pygame.transform.flip(self.image_1, True, False)
 
         self.rect.x -= self.velocidade
-        self.rect.x = max(self.rect.x, -56)  # Impede que ultrapasse o limite esquerdo
+        self.rect.x = max(self.rect.x, -56)
         self.andando = True
 
     def p_direita(self):
-        if self.direcao == 1:  # Se estava virado para a esquerda
-            self.direcao = 0  # Agora está para a direita
+        if self.direcao == 1:
+            self.direcao = 0
             self.images = [pygame.transform.flip(img, True, False) for img in self.images]
-            self.image_1 = pygame.transform.flip(self.image_1, True, False)  # Inverte a imagem parada
+            self.image_1 = pygame.transform.flip(self.image_1, True, False)
 
         self.rect.x += self.velocidade
-        self.rect.x = min(self.rect.x, 497)  # Impede que ultrapasse o limite direito
+        self.rect.x = min(self.rect.x, 497)
         self.andando = True
 
 
